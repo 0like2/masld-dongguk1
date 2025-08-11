@@ -1,0 +1,67 @@
+# 필수 경로
+counts: "/path/to/GSE132040_counts.tsv"         # genes x samples, 첫 컬럼 gene
+metadata: "/path/to/sample_metadata.csv"        # columns: sample, group(Young/Old)
+outdir: "results_TMS_bulk"
+
+# 통계 임계값
+padj: 0.05
+l2fc: 0.5
+
+# GSEA 세부
+gsea:
+  processes: 4
+  libraries:
+    - GO_Biological_Process_2023
+    - Reactome_2022
+    - KEGG_2021_Human
+    - MSigDB_Hallmark_2020
+  lipid_keywords:
+    - lipid
+    - fatty
+    - sterol
+    - cholesterol
+    - lipoprotein
+    - glycerolipid
+    - phospholipid
+    - triglyceride
+
+# 그림/출력 옵션
+plots:
+  pca_filename: "PCA_log2norm.png"
+  volcano_filename: "Volcano.png"
+  heatmap_filename: "Heatmap_TopDEGs.png"
+  violin_filename: "LPL_genes_violin.png"
+
+# LPL gene 리스트(필요시 자유롭게 추가/변경)
+lpl_genes:
+  - PLA2G4A
+  - PLA2G6
+  - PLA2G7
+  - PNPLA6
+  - PLA2G10
+  - LPCAT1
+  - LPCAT2
+  - LPCAT3
+  - LPCAT4
+  - LPEAT1
+  - MBOAT2
+  - AGPAT1
+  - AGPAT2
+  - ENPP2
+  - PLPP1
+  - PLPP2
+  - PLPP3
+  - LPAR1
+  - LPAR2
+  - LPAR3
+  - LPAR4
+  - LPAR5
+  - LPAR6
+  - GPR4
+  - FFAR4
+  - TLR2
+  - TLR4
+  - MFSD2A
+  - SPNS2
+  - ABCA1
+  - ABCG1

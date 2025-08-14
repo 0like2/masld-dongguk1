@@ -1,7 +1,7 @@
 # 필수 경로
-counts: "/path/to/GSE132040_counts.tsv"         # genes x samples, 첫 컬럼 gene
-metadata: "/path/to/sample_metadata.csv"        # columns: sample, group(Young/Old)
-outdir: "results_TMS_bulk"
+counts: "../data/GSE288534_Palbo_Genecount_preprocessed.txt"         # genes x samples, 첫 컬럼 gene
+metadata: "../data/GSE288534_meta.csv"       # columns: sample, group(Young/Old)
+outdir: "../results_TMS_bulk/"
 
 # 통계 임계값
 padj: 0.05

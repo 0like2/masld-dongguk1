@@ -80,6 +80,8 @@ def plot_pca(
 
     if sample_col not in meta.columns:
         raise ValueError(f"`meta` must contain '{sample_col}' column.")
+    if sample_col not in pc_df.columns:
+        pc_df = pc_df.reset_index().rename(columns={"index": sample_col})
     pc_df = pc_df.merge(meta, on=sample_col, how="left")
 
     plt.figure(figsize=(6, 5))

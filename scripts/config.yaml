@@ -1,13 +1,13 @@
 # 필수 경로
-counts: "../results/count_matrix_preprocessed.csv"       # genes x samples, 첫 컬럼 gene
-metadata: "../data/GSE288534_meta.csv"       # columns: sample, group(Young/Old)
+counts: "../results/count_matrix_preprocessed.csv"
+metadata: "../data/GSE288534_meta.csv"
 outdir: "../results/final_analysis/"
 
 # 통계 임계값
 padj: 0.05
 l2fc: 0.5
 
-# GSEA 세부
+# GSEA
 gsea:
   processes: 4
   libraries:
@@ -32,36 +32,44 @@ plots:
   heatmap_filename: "Heatmap_TopDEGs.png"
   violin_filename: "LPL_genes_violin.png"
 
-# LPL gene 리스트(필요시 자유롭게 추가/변경)
+# LPL gene 리스트 (마우스 유전자 이름으로 수정됨)
 lpl_genes:
-  - PLA2G4A
-  - PLA2G6
-  - PLA2G7
-  - PNPLA6
-  - PLA2G10
-  - LPCAT1
-  - LPCAT2
-  - LPCAT3
-  - LPCAT4
-  - LPEAT1
-  - MBOAT2
-  - AGPAT1
-  - AGPAT2
-  - ENPP2
-  - PLPP1
-  - PLPP2
-  - PLPP3
-  - LPAR1
-  - LPAR2
-  - LPAR3
-  - LPAR4
-  - LPAR5
-  - LPAR6
-  - GPR4
-  - FFAR4
-  - TLR2
-  - TLR4
-  - MFSD2A
-  - SPNS2
-  - ABCA1
-  - ABCG1
+  - Pla2g4a
+  - Pla2g6
+  - Pla2g7
+  - Pnpla6
+  - Pla2g10
+  - Lpcat1
+  - Lpcat2
+  - Lpcat3
+  - Lpcat4
+  - Lpeat1
+  - Mboat2
+  - Agpat1
+  - Agpat2
+  - Enpp2
+  - Plpp1
+  - Plpp2
+  - Plpp3
+  - Lpar1
+  - Lpar2
+  - Lpar3
+  - Lpar4
+  - Lpar5
+  - Lpar6
+  - Gpr4
+  - Ffar4
+  - Tlr2
+  - Tlr4
+  - Mfsd2a
+  - Spns2
+  - Abca1
+  - Abcg1
+
+# ssGSEA 분석을 위한 유전자 서명
+signatures:
+  # SenMayo는 이미 마우스 형식과 유사하여 그대로 유지
+  SenMayo: ["Acvr1b", "Ang", "Angpt1", "Angpt4", "Areg", "Axl", "Bex3", "Bmp2", "Bmp6", "C3", "Ccl1", "Ccl13", "Ccl16", "Ccl2", "Ccl20", "Ccl24", "Ccl26", "Ccl3", "Ccl3l1", "Ccl4", "Ccl5", "Ccl7", "Ccl8", "Cd55", "Cd9", "Csf1", "Csf2", "Csf2rb", "Cst4", "Ctnnb1", "Ctsb", "Cxcl1", "Cxcl10", "Cxcl12", "Cxcl16", "Cxcl2", "Cxcl3", "Cxcl8", "Cxcr2", "Dkk1", "Edn1", "Egf", "Egfr", "Ereg", "Esm1", "Ets2", "Fas", "Fgf1", "Fgf2", "Fgf7", "Gdf15", "Gem", "Gmfg", "Hgf", "Hmgb1", "Icam1", "Icam3", "Igf1", "Igfbp1", "Igfbp2", "Igfbp3", "Igfbp4", "Igfbp5", "Igfbp6", "Igfbp7", "Il10", "Il13", "Il15", "Il18", "Il1a", "Il1b", "Il2", "Il32", "Il6", "Il6st", "Il7", "Inha", "Iqgap2", "Itga2", "Itpka", "Jun", "Kitlg", "Lcp1", "Mif", "Mmp1", "Mmp10", "Mmp12", "Mmp13", "Mmp14", "Mmp2", "Mmp3", "Mmp9", "Nap1l4", "Nrg1", "Pappa", "Pecam1", "Pgf", "Pigf", "Plat", "Plau", "Plaur", "Ptbp1", "Ptger2", "Ptges", "Rps6ka5", "Scamp4", "Selplg", "Sema3f", "Serpinb4", "Serpine1", "Serpine2", "Spp1", "Spx", "Timp2", "Tnf", "Tnfrsf10c", "Tnfrsf11b", "Tnfrsf1a", "Tnfrsf1b", "Tubgcp2", "Vegfa", "Vegfc", "Vgf", "Wnt16", "Wnt2"]
+
+  # SHGS 목록을 마우스 유전자 형식(첫 글자만 대문자)으로 수정
+  SHGS: ["Ankrd11", "Atad2", "Baz1b", "Brd2", "Brd3", "Brd4", "Cbx1", "Cbx3", "Cbx5", "Ehmt2", "Ezh2", "Hat1", "Hdac1", "Hdac2", "Hdac3", "Hdac4", "Hdac5", "Hdac6", "Hdac7", "Hdac8", "Hdac9", "Hdac10", "Hdac11", "Kat2a", "Kat2b", "Kdm1a", "Kdm1b", "Kdm2b", "Kdm3a", "Kdm3b", "Kdm4a", "Kdm4b", "Kdm4c", "Kdm4d", "Kdm5a", "Kdm5b", "Kdm5c", "Kdm5d", "Kmt2a", "Kmt2b", "Kmt2c", "Kmt2d", "Kmt2e", "Kmt5a", "Kmt5b", "Kmt5c", "Mbd1", "Mbd2", "Mbd3", "Mecp2", "Prmt1", "Prmt5", "Setdb1", "Setd2", "Sirt1", "Sirt2", "Sirt3", "Sirt4", "Sirt5", "Sirt6", "Sirt7", "Smarca4", "Smrcb1", "Smarcc1", "Smarcd1", "Smarce1", "Suv39h1", "Suv39h2", "Uhrf1"]

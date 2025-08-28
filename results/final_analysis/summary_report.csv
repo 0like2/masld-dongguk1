@@ -1,0 +1,16 @@
+Category,Value
+Total Genes in Count Matrix,22944
+Total Samples,10
+Condition: Experimental,5
+Condition: Control,5
+Total Significant DEGs,1180
+Up-regulated DEGs,206
+Down-regulated DEGs,974
+GSEA: Total Enriched Pathways,4009
+Enrichment (Up): Total Pathways,1705
+Enrichment (Up): Lipid-related,87
+Enrichment (Down): Total Pathways,4533
+Enrichment (Down): Lipid-related,130
+ssGSEA: Senescence Signatures Analyzed,2
+ssGSEA: Up-regulated Lipid GO Signatures,10
+ssGSEA: Down-regulated Lipid GO Signatures,10

@@ -13,7 +13,7 @@ gsea:
   libraries:
     - GO_Biological_Process_2023
     - Reactome_2022
-    - KEGG_2021_Human
+    - KEGG_2019_Mouse
     - MSigDB_Hallmark_2020
   lipid_keywords:
     - lipid

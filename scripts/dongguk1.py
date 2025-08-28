@@ -36,7 +36,8 @@ def run_enrichment_on_degs(gene_list, out_prefix, libraries):
         return None
     print(f"{os.path.basename(out_prefix)}: Enrichment 분석 중 ({len(gene_list)}개 유전자)...")
     try:
-        enr_res = gp.enrichr(gene_list=gene_list, gene_sets=libraries, outdir=None, cutoff=0.05)
+        # 'organism' 인자를 추가하여 마우스 기준으로 분석하도록 수정
+        enr_res = gp.enrichr(gene_list=gene_list, gene_sets=libraries, organism='Mouse', outdir=None, cutoff=0.05)
         if enr_res is not None:
             enr_res.results.to_csv(f"{out_prefix}_summary.csv")
             return enr_res.results
@@ -144,7 +145,8 @@ if __name__ == '__main__':
     step_counter = 1
 
     # --- 1. 설정 및 데이터 로딩 ---
-    print(f"--- {step_counter}. 설정 및 데이터 로딩 ---"); step_counter += 1
+    print(f"--- {step_counter}. 설정 및 데이터 로딩 ---");
+    step_counter += 1
     cfg = load_config(args.config)
     outdir = mkdir_p(cfg["outdir"])
     counts_df = pd.read_csv(cfg["counts"], index_col=0)
@@ -153,7 +155,8 @@ if __name__ == '__main__':
     print(f"Metadata 로드 완료: {meta_df.shape} (샘플 수 x 정보)")
 
     # --- 2. DEG 분석 및 시각화 ---
-    print(f"\n--- {step_counter}. DEG 분석 및 시각화 ---"); step_counter += 1
+    print(f"\n--- {step_counter}. DEG 분석 및 시각화 ---");
+    step_counter += 1
     meta_df_indexed = meta_df.set_index("sample")
     dds = DeseqDataSet(counts=counts_df.T, metadata=meta_df_indexed, design="~ condition")
     dds.deseq2()
@@ -185,7 +188,8 @@ if __name__ == '__main__':
         print(f"Heatmap 저장 완료: {cfg['plots']['heatmap_filename']}")
 
     # --- 3. GSEA Prerank 분석 ---
-    print(f"\n--- {step_counter}. GSEA Prerank 분석 ---"); step_counter += 1
+    print(f"\n--- {step_counter}. GSEA Prerank 분석 ---");
+    step_counter += 1
     res_df_ranked = res_df.dropna(subset=['pvalue', 'log2FoldChange']).copy()
     res_df_ranked['rank_metric'] = -np.log10(res_df_ranked['pvalue'].replace(0, 1e-300)) * np.sign(
         res_df_ranked['log2FoldChange'])
@@ -195,24 +199,43 @@ if __name__ == '__main__':
                                 processes=cfg["gsea"].get("processes", 4))
 
     # --- 4. 유의 유전자 기반 Enrichment 분석 ---
-    print(f"\n--- {step_counter}. 유의 유전자 기반 Enrichment 분석 ---"); step_counter += 1
+    print(f"\n--- {step_counter}. 유의 유전자 기반 Enrichment 분석 ---");
+    step_counter += 1
     up_genes = res_sig[res_sig["log2FoldChange"] > 0].index.tolist()
     dn_genes = res_sig[res_sig["log2FoldChange"] < 0].index.tolist()
-    up_prefix = os.path.join(outdir, "Enrichment_Up_regulated")
-    up_enrichment = run_enrichment_on_degs(up_genes, up_prefix, cfg["gsea"]["libraries"])
-    plot_enrichment_results(up_enrichment, up_prefix)
-    dn_prefix = os.path.join(outdir, "Enrichment_Down_regulated")
-    down_enrichment = run_enrichment_on_degs(dn_genes, dn_prefix, cfg["gsea"]["libraries"])
-    plot_enrichment_results(down_enrichment, dn_prefix)
+
+    # 먼저 Enrichment 분석을 한 번에 실행하여 전체 결과를 얻습니다.
+    up_prefix_base = os.path.join(outdir, "Enrichment_Up_regulated")
+    up_enrichment = run_enrichment_on_degs(up_genes, up_prefix_base, cfg["gsea"]["libraries"])
+    dn_prefix_base = os.path.join(outdir, "Enrichment_Down_regulated")
+    down_enrichment = run_enrichment_on_degs(dn_genes, dn_prefix_base, cfg["gsea"]["libraries"])
+
+    # 각 라이브러리별로 결과를 필터링하여 개별적으로 그림을 생성합니다.
+    if up_enrichment is not None:
+        print("\n[Up-regulated] 라이브러리별 Enrichment 결과 시각화 중...")
+        for lib_name in cfg["gsea"]["libraries"]:
+            lib_results = up_enrichment[up_enrichment['Gene_set'] == lib_name]
+            lib_prefix = f"{up_prefix_base}_{lib_name.replace(' ', '_').split('(')[0]}"
+            plot_enrichment_results(lib_results, lib_prefix)
+
+    if down_enrichment is not None:
+        print("\n[Down-regulated] 라이브러리별 Enrichment 결과 시각화 중...")
+        for lib_name in cfg["gsea"]["libraries"]:
+            lib_results = down_enrichment[down_enrichment['Gene_set'] == lib_name]
+            lib_prefix = f"{dn_prefix_base}_{lib_name.replace(' ', '_').split('(')[0]}"
+            plot_enrichment_results(lib_results, lib_prefix)
+
 
     # --- 5. Lipid 관련 경로 필터링 및 시각화 ---
-    print(f"\n--- {step_counter}. Lipid 관련 경로 필터링 및 시각화 ---"); step_counter += 1
+    print(f"\n--- {step_counter}. Lipid 관련 경로 필터링 및 시각화 ---");
+    step_counter += 1
     if cfg["gsea"].get("lipid_keywords"):
-        plot_filtered_enrichment_results(up_enrichment, cfg["gsea"]["lipid_keywords"], up_prefix)
-        plot_filtered_enrichment_results(down_enrichment, cfg["gsea"]["lipid_keywords"], dn_prefix)
+        plot_filtered_enrichment_results(up_enrichment, cfg["gsea"]["lipid_keywords"], up_prefix_base)
+        plot_filtered_enrichment_results(down_enrichment, cfg["gsea"]["lipid_keywords"], dn_prefix_base)
 
     # --- 6. Senescence Signature ssGSEA 분석 ---
-    print(f"\n--- {step_counter}. Senescence Signature ssGSEA 분석 ---"); step_counter += 1
+    print(f"\n--- {step_counter}. Senescence Signature ssGSEA 분석 ---");
+    step_counter += 1
     signatures = cfg.get("signatures")
     if signatures:
         senescence_prefix = os.path.join(outdir, "ssGSEA_Signatures")
@@ -222,7 +245,8 @@ if __name__ == '__main__':
             plot_ssgsea_scores(signature_scores, meta_df, senescence_prefix, prefix="Signatures_", plot_type='grid')
 
     # --- 7. Lipid-term ssGSEA 분석 ---
-    print(f"\n--- {step_counter}. Lipid-term ssGSEA 분석 ---"); step_counter += 1
+    print(f"\n--- {step_counter}. Lipid-term ssGSEA 분석 ---");
+    step_counter += 1
     lipid_gene_sets_up = {}
     if up_enrichment is not None:
         go_bp_results = up_enrichment[up_enrichment['Gene_set'] == 'GO_Biological_Process_2023']
@@ -231,13 +255,12 @@ if __name__ == '__main__':
             lipid_go_terms = go_bp_results[go_bp_results['Term'].str.contains(pattern, case=False)]
             if not lipid_go_terms.empty:
                 top_lipid_terms = lipid_go_terms.sort_values("Adjusted P-value").head(10)
-                # <<<<<<<<<<<<<<< 수정된 부분 시작 >>>>>>>>>>>>>>>
-                # Enrichr의 Human 유전자를 Mouse 형식(첫글자만 대문자)으로 변환
+
                 lipid_gene_sets_up = {
-                    row['Term']: [gene.capitalize() for gene in row['Genes'].split(';')]
+                    row['Term']: row['Genes'].split(';')
                     for _, row in top_lipid_terms.iterrows()
                 }
-                # <<<<<<<<<<<<<<< 수정된 부분 끝 >>>>>>>>>>>>>>>
+
                 lipid_ssgsea_prefix = os.path.join(outdir, "ssGSEA_Lipid_GO_Terms_Up")
                 lipid_scores = run_ssgsea(log_norm_counts, lipid_gene_sets_up, lipid_ssgsea_prefix,
                                           processes=cfg["gsea"].get("processes", 4))
@@ -253,13 +276,10 @@ if __name__ == '__main__':
             lipid_go_terms_dn = go_bp_results_dn[go_bp_results_dn['Term'].str.contains(pattern, case=False)]
             if not lipid_go_terms_dn.empty:
                 top_lipid_terms_dn = lipid_go_terms_dn.sort_values("Adjusted P-value").head(10)
-                # <<<<<<<<<<<<<<< 수정된 부분 시작 >>>>>>>>>>>>>>>
-                # Enrichr의 Human 유전자를 Mouse 형식(첫글자만 대문자)으로 변환
                 lipid_gene_sets_down = {
-                    row['Term']: [gene.capitalize() for gene in row['Genes'].split(';')]
+                    row['Term']: row['Genes'].split(';')
                     for _, row in top_lipid_terms_dn.iterrows()
                 }
-                # <<<<<<<<<<<<<<< 수정된 부분 끝 >>>>>>>>>>>>>>>
                 lipid_ssgsea_prefix_dn = os.path.join(outdir, "ssGSEA_Lipid_GO_Terms_Down")
                 lipid_scores_dn = run_ssgsea(log_norm_counts, lipid_gene_sets_down, lipid_ssgsea_prefix_dn,
                                              processes=cfg["gsea"].get("processes", 4))
@@ -268,7 +288,8 @@ if __name__ == '__main__':
                                        plot_type='grid')
 
     # --- 8. 관심 유전자 발현 시각화 ---
-    print(f"\n--- {step_counter}. 관심 유전자 발현 시각화 ---"); step_counter += 1
+    print(f"\n--- {step_counter}. 관심 유전자 발현 시각화 ---");
+    step_counter += 1
     if "lpl_genes" in cfg and cfg["lpl_genes"]:
         plot_violin(norm_counts=log_norm_counts, gene_list=cfg["lpl_genes"],
                     meta=meta_df.rename(columns={"condition": "group"}),
@@ -301,8 +322,9 @@ if __name__ == '__main__':
         'lipid_go_terms_up_count': len(lipid_gene_sets_up),
         'lipid_go_terms_down_count': len(lipid_gene_sets_down)
     }
-    generate_summary_report(stats_to_report, os.path.join(outdir, "summary_report.csv"), step_num=step_counter); step_counter += 1
-    organize_output_files(outdir, step_num=step_counter); step_counter += 1
-
+    generate_summary_report(stats_to_report, os.path.join(outdir, "summary_report.csv"), step_num=step_counter);
+    step_counter += 1
+    organize_output_files(outdir, step_num=step_counter);
+    step_counter += 1
 
     print("\n[Done] 모든 분석이 완료되었습니다. 결과를 'results/final_analysis' 폴더에서 확인하세요.")
